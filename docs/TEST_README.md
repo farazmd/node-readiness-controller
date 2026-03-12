@@ -15,7 +15,7 @@ The test uses a 3-node Kind cluster:
 
 ### Prerequisites
 
--   [Docker](https://docs.docker.com/get-docker/)
+-   [Docker](https://docs.docker.com/get-docker/) or [Podman](https://podman.io/getting-started/installation)
 -   [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 -   [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 -   [Go](https://golang.org/doc/install)
@@ -38,19 +38,42 @@ make install
 
 Build the controller image and load it into the Kind cluster nodes.
 
+**Using Docker:**
 ```bash
-# Build the image
-make docker-build IMG_PREFIX=controller IMG_TAG=latest
+# Build the image (uses defaults: IMG_PREFIX=controller IMG_TAG=latest)
+make docker-build
 
-# Load the image into the kind cluster
-kind load docker-image controller:latest --name nrr-test
+# Load the image into the kind cluster (uses default: KIND_CLUSTER=nrr-test)
+make kind-load
+
+# Verify the image is loaded
+docker exec -it nrr-test-control-plane crictl images | grep controller
+```
+
+**Using Podman:**
+```bash
+# Build the image (uses defaults: IMG_PREFIX=controller IMG_TAG=latest)
+make podman-build
+
+# Load the image into the kind cluster (uses default: KIND_CLUSTER=nrr-test)
+make kind-load CONTAINER_TOOL=podman
+
+# Verify the image is loaded
+podman exec -it nrr-test-control-plane crictl images | grep controller
 ```
 
 ### Step 3: Controller Deployment
 
-Deploy the controller image to nrr-test-worker
+Deploy the controller to the cluster.
+
+**Using Docker:**
 ```bash
 make deploy IMG_PREFIX=controller IMG_TAG=latest
+```
+
+**Using Podman:**
+```bash
+make deploy IMG_PREFIX=localhost/controller IMG_TAG=latest
 ```
 
 Verify the controller is running on the control plane node (`nrr-test-control-plane`):
